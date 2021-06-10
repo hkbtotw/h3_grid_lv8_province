@@ -140,9 +140,9 @@ def Write_H3_Kepler_Grid_Province(df_input):
     
     #sql="""delete from [TSR_ADHOC].[dbo].[H3_Grid_Province]  """ 
     sql="""select * from [TSR_ADHOC].[dbo].[H3_Kepler_Grid_Lv8_Province]  """
-    cursor=conn1.cursor()
+    cursor=conn2.cursor()
     cursor.execute(sql)
-    conn1.commit()
+    conn2.commit()
 
     for index, row in df_write.iterrows():
         cursor.execute("""INSERT INTO [TSR_ADHOC].[dbo].[H3_Kepler_Grid_Lv8_Province](	
