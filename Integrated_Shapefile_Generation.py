@@ -120,7 +120,7 @@ def Write_H3_Grid_Province(df_input):
     conn1.commit()
 
     cursor.close()
-    conn1.close()
+    #conn1.close()
     print('------------Complete WriteDB-------------')
 
 def Write_H3_Kepler_Grid_Province(df_input):
@@ -170,7 +170,7 @@ def Write_H3_Kepler_Grid_Province(df_input):
     conn2.commit()
 
     cursor.close()
-    conn2.close()
+    #conn2.close()
     print('------------Complete WriteDB-------------')
 
 
