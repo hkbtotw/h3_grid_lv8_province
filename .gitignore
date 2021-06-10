@@ -1,0 +1,9 @@
+*.csv
+*.xlsx
+qgis_shapefile/
+shapefile/
+Credential.*
+Shapefile_Generation.py
+
+
+
