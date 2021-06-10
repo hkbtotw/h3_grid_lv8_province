@@ -133,7 +133,7 @@ def Write_H3_Kepler_Grid_Province(df_input):
 
 	## ODBC Driver 17 for SQL Server
     # SQL Server
-    conn1 = connect_tad_2
+    conn2 = connect_tad_2
     
 
     #- View all records from the table
@@ -167,10 +167,10 @@ def Write_H3_Kepler_Grid_Province(df_input):
       ,row['p_name_t']
       ,row['DBCreatedAt']
         )
-    conn1.commit()
+    conn2.commit()
 
     cursor.close()
-    conn1.close()
+    conn2.close()
     print('------------Complete WriteDB-------------')
 
 
