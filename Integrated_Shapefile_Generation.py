@@ -19,6 +19,7 @@ nowStr=datetime.today().strftime('%Y-%m-%d %H:%M:%S')
 print("TodayStr's date:", todayStr,' -- ',type(todayStr))
 print("nowStr's date:", nowStr,' -- ',type(nowStr))
 
+conn = connect_tad
 
 def ConvertGeometryCoordinate(n):
 
@@ -73,7 +74,7 @@ def AssignPopulationToHex(idIn, dfagg):
     del dfDummy
     return totalsum['population']
 
-def Write_H3_Grid_Province(df_input):
+def Write_H3_Grid_Province(df_input, conn1):
     print('------------- Start WriteDB -------------')
     #df_input=df_input.replace([np.inf,-np.inf,np.nan],-999)
     df_input=df_input.replace({np.nan:None})
@@ -83,7 +84,7 @@ def Write_H3_Grid_Province(df_input):
 
 	## ODBC Driver 17 for SQL Server
     # SQL Server
-    conn1 = connect_tad
+   
     
 
     #- View all records from the table
@@ -123,7 +124,7 @@ def Write_H3_Grid_Province(df_input):
     #conn1.close()
     print('------------Complete WriteDB-------------')
 
-def Write_H3_Kepler_Grid_Province(df_input):
+def Write_H3_Kepler_Grid_Province(df_input,conn2):
     print('------------- Start WriteDB -------------')
     #df_input=df_input.replace([np.inf,-np.inf,np.nan],-999)
     df_input=df_input.replace({np.nan:None})
@@ -133,7 +134,7 @@ def Write_H3_Kepler_Grid_Province(df_input):
 
 	## ODBC Driver 17 for SQL Server
     # SQL Server
-    conn2 = connect_tad_2
+    
     
 
     #- View all records from the table
@@ -170,7 +171,7 @@ def Write_H3_Kepler_Grid_Province(df_input):
     conn2.commit()
 
     cursor.close()
-    #conn2.close()
+
     print('------------Complete WriteDB-------------')
 
 
@@ -255,7 +256,7 @@ for file_name in filenameList:  # [:2]:
         dfDummy['DBCreatedAt']=nowStr 
         dfDummy_2=dfDummy.copy()
         dfDummy_2['geometry']=dfDummy_2['geometry'].astype(str)
-        Write_H3_Kepler_Grid_Province(dfDummy_2)
+        Write_H3_Kepler_Grid_Province(dfDummy_2,conn)
 
         
         #print(' --> ',df.head(10))
@@ -270,10 +271,10 @@ for file_name in filenameList:  # [:2]:
 
         print(dfDummy.columns,' ===> ',dfDummy)
         dfDummy.to_csv(qgis_path+'test_'+province+'_shapefile_32647.csv')   
-        Write_H3_Grid_Province(dfDummy)    
+        Write_H3_Grid_Province(dfDummy,conn)    
     else:
         print(' No population in =======> ',province)
-
+conn.close()
 del dfDummy, dfHex, dfagg, dfDummy_2
 ###****************************************************************
 end_datetime = datetime.now()
