@@ -387,7 +387,7 @@ qgis_path='C:\\Users\\70018928\\Documents\\Project2021\\Experiment\\Uber_h3\\qgi
 filenameList=GetFileNameList(file_path)
 #print(' ---> ',filenameList)
 
-for file_name in filenameList[:2]:
+for file_name in filenameList:  #[:2]:
     #file_name='boundary_ชลบุรี.data'
 
     province=file_name.split('_')[1].split('.')[0]

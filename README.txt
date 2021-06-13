@@ -17,3 +17,6 @@ How:
 Note: Code will read the boundary data file in folder boundary and generate shapefiles ( in csv ) to use with Kepler.gl and QGIS 
 in table : [TSR_ADHOC].[dbo].[H3_Kepler_Grid_Lv8_Province]  and [TSR_ADHOC].[dbo].[H3_Grid_Lv8_Province] respectively.
 => Code uses h8-level grid which covers around 0.7 km2 on the map
+
+tutorial on H3:
+1.Study ipython files in ipython_notebook folder  (to run use Folium environment and install kernel in jupyter notebook)
