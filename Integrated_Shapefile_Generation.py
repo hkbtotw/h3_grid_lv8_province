@@ -454,24 +454,30 @@ for file_name in filenameList[:2]:
     dfDummy.drop(columns=['geometry'],inplace=True)
     dfDummy.rename(columns={'geom_2':'geometry'},inplace=True)
     dfDummy['geometry']=dfDummy['geometry'].astype(str)
-
+    
 
     # Find District and Subdistrict location of each grid
+
+
     print(' ===>  Reverse Geocoding')
-    dfDummy=Reverse_GeoCoding(dfDummy)
-    includeList=[ 'hex_id', 'population','population_youth', 'Latitude', 'Longitude','p_name_t_left',
-       'DBCreatedAt', 'geometry', 'a_name_t',  't_name_t', 's_region', 'prov_idn', 'amphoe_idn', 'tambon_idn',]       
-    dfDummy=dfDummy[includeList]
-    dfDummy.rename(columns={'p_name_t_left':'p_name_t'},inplace=True)
-    print(dfDummy.columns,' ===> ',dfDummy)
+    dfPAT=Reverse_GeoCoding(dfDummy[['hex_id', 'Latitude', 'Longitude']])
+    includeList=['hex_id', 'Latitude', 'Longitude','p_name_t',
+       'a_name_t',  't_name_t', 's_region', 'prov_idn', 'amphoe_idn', 'tambon_idn']       
+    dfPAT=dfPAT[includeList]
+    
+
+    mainDf=pd.merge(dfDummy, dfPAT, how="left", on=["hex_id"])
+    mainDf.rename(columns={'Latitude_x':'Latitude','Longitude_x':'Longitude','p_name_t_x':'p_name_t'},inplace=True)
+    print(mainDf.columns,' ===> ',mainDf, ' ----  ',mainDf.dtypes)
+    
 
     # Write data to files and databse
     print(' ===>  QGIS data out ')
-    dfDummy.to_csv(qgis_path+'test_'+province+'_shapefile_32647_PAT.csv')   
-    Write_H3_Grid_Province_PAT(dfDummy,conn) 
+    mainDf.to_csv(qgis_path+'test_'+province+'_shapefile_32647_PAT.csv')   
+    Write_H3_Grid_Province_PAT(mainDf,conn) 
 
 conn.close()
-del dfDummy, dfHex, dfDummy_2
+del dfDummy, dfHex, dfDummy_2, mainDf, dfPAT
 del includeList, hexagons, totalList, testlist, hexList, filenameList
 ###****************************************************************
 end_datetime = datetime.now()
