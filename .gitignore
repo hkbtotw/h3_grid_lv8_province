@@ -4,6 +4,8 @@ qgis_shapefile/
 shapefile/
 Credential.*
 Shapefile_Generation.py
+SHAPE/
+bck.*
 
 
 

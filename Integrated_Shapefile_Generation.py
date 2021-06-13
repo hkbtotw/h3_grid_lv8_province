@@ -4,6 +4,7 @@ from datetime import datetime, date, timedelta
 from geopandas import GeoDataFrame
 from shapely.geometry import Polygon, mapping
 import pyproj    #to convert coordinate system
+from csv_join_tambon import Reverse_GeoCoding
 from Credential import *
 import numpy as np
 import os
@@ -11,6 +12,9 @@ import ast
 import pandas as pd
 import pickle
 import glob
+import warnings
+
+warnings.filterwarnings('ignore')
 
 start_datetime = datetime.now()
 print (start_datetime,'execute')
@@ -19,7 +23,7 @@ nowStr=datetime.today().strftime('%Y-%m-%d %H:%M:%S')
 print("TodayStr's date:", todayStr,' -- ',type(todayStr))
 print("nowStr's date:", nowStr,' -- ',type(nowStr))
 
-conn = connect_tad
+
 
 def ConvertGeometryCoordinate(n):
 
@@ -174,18 +178,216 @@ def Write_H3_Kepler_Grid_Province(df_input,conn2):
 
     print('------------Complete WriteDB-------------')
 
+def Write_H3_Grid_Province_PAT(df_input, conn1):
+    print('------------- Start WriteDB -------------')
+    #df_input=df_input.replace([np.inf,-np.inf,np.nan],-999)
+    df_input=df_input.replace({np.nan:None})
+    df_write=df_input
+    print(' col : ',df_write.columns)
 
 
+	## ODBC Driver 17 for SQL Server
+    # SQL Server
+   
+    
+
+    #- View all records from the table
+    
+    #sql="""delete from [TSR_ADHOC].[dbo].[H3_Grid_Province]  """ 
+    sql="""select * from [TSR_ADHOC].[dbo].[H3_Grid_Lv8_Province_PAT]  """
+    cursor=conn1.cursor()
+    cursor.execute(sql)
+    conn1.commit()
+
+    for index, row in df_write.iterrows():
+        cursor.execute("""INSERT INTO [TSR_ADHOC].[dbo].[H3_Grid_Lv8_Province_PAT](	
+
+     [hex_id]
+      ,[Latitude]
+      ,[Longitude]
+      ,[population]
+      ,[population_youth]
+      ,[geometry]
+      ,[p_name_t]
+      ,[a_name_t]
+      ,[t_name_t]
+      ,[s_region]
+      ,[prov_idn]
+      ,[amphoe_idn]
+      ,[tambon_idn]
+      ,[DBCreatedAt]
+    
+	)     
+    values(?,?,?,?,?,
+    ?,?,?,?,?,
+    ?,?,?,?
+  
+    )""", 
+      row['hex_id']
+      ,row['Latitude']
+      ,row['Longitude']
+      ,row['population']
+      ,row['population_youth']
+      ,row['geometry']
+      ,row['p_name_t']
+      ,row['a_name_t']
+      ,row['t_name_t']
+      ,row['s_region']
+      ,row['prov_idn']
+      ,row['amphoe_idn']
+      ,row['tambon_idn']
+      ,row['DBCreatedAt']
+        )
+    conn1.commit()
+
+    cursor.close()
+    #conn1.close()
+    print('------------Complete WriteDB-------------')
+
+def Write_H3_Kepler_Grid_Province_2(df_input,conn2):
+    print('------------- Start WriteDB -------------')
+    #df_input=df_input.replace([np.inf,-np.inf,np.nan],-999)
+    df_input=df_input.replace({np.nan:None})
+    df_write=df_input
+    print(' col : ',df_write.columns)
+
+
+	## ODBC Driver 17 for SQL Server
+    # SQL Server
+    
+    
+
+    #- View all records from the table
+    
+    #sql="""delete from [TSR_ADHOC].[dbo].[H3_Grid_Province]  """ 
+    sql="""select * from [TSR_ADHOC].[dbo].[H3_Kepler_Grid_Lv8_Province_2]  """
+    cursor=conn2.cursor()
+    cursor.execute(sql)
+    conn2.commit()
+
+    for index, row in df_write.iterrows():
+        cursor.execute("""INSERT INTO [TSR_ADHOC].[dbo].[H3_Kepler_Grid_Lv8_Province_2](	
+
+      [hex_id]
+      ,[Latitude]
+      ,[Longitude]
+      ,[population]
+      ,[population_youth]
+      ,[geometry]
+      ,[p_name_t]
+      ,[DBCreatedAt]
+    
+	)     
+    values(?,?,?,?,?,?,?,?
+  
+    )""", 
+      row['hex_id']
+      ,row['Latitude']
+      ,row['Longitude']
+      ,row['population']
+      ,row['population_youth']
+      ,row['geometry']
+      ,row['p_name_t']
+      ,row['DBCreatedAt']
+        )
+    conn2.commit()
+
+    cursor.close()
+
+    print('------------Complete WriteDB-------------')
+
+
+# Read external complementary data to present on each grid
+def Get_Facebook_Population(province, dfHex, columns_name):
+    #######################################################################################################
+    # Read facebook population from database on sandbox    
+    dfIn=Read_Location_Population(province)    
+
+    if(len(dfIn)>0):        
+        print('There are population in ',province)
+        # Read Facebook population ,saved in dfIn, selected only lat lng and population columns stored in dfDummy
+        #print(dfIn.columns, '===== ',dfIn.head(5))
+        dfDummy=dfIn[['Longitude','Latitude','population']].copy()        
+        del dfIn
+        #print(dfDummy.columns,' ----- ',dfDummy.head(5))
+
+        # Find hex_id of population location
+        dfDummy['hex_id']=dfDummy.apply(lambda x:GetH3hex(x['Latitude'],x['Longitude'],h3_level),axis=1)        
+        
+        # compute summation of population on each existing grid in dfDummy
+        dfagg = dfDummy.groupby(by = "hex_id").sum()
+        dfagg.drop(columns=['Longitude','Latitude'],inplace=True)
+        dfagg=dfagg.reset_index()
+     
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=dfHex.apply(lambda x: AssignPopulationToHex(x['hex_id'],dfagg),axis=1)
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+        del dfagg       
+   
+    else:
+        print(' No population in =======> ',province)
+        
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=0
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+    ##########################################################################################
+    return dfHex
+
+def Get_Facebook_Population_Youth_15_24(province, dfHex, columns_name):
+    #######################################################################################################
+    # Read facebook population from database on sandbox    
+    dfIn=Read_Location_Population_Youth_15_24(province)   
+
+    if(len(dfIn)>0):        
+        print('There are population in ',province)
+        # Read Facebook population ,saved in dfIn, selected only lat lng and population columns stored in dfDummy
+        #print(dfIn.columns, '===== ',dfIn.head(5))
+        dfDummy=dfIn[['Longitude','Latitude','population']].copy()        
+        del dfIn
+        #print(dfDummy.columns,' ----- ',dfDummy.head(5))
+
+        # Find hex_id of population location
+        dfDummy['hex_id']=dfDummy.apply(lambda x:GetH3hex(x['Latitude'],x['Longitude'],h3_level),axis=1)        
+        
+        # compute summation of population on each existing grid in dfDummy
+        dfagg = dfDummy.groupby(by = "hex_id").sum()
+        dfagg.drop(columns=['Longitude','Latitude'],inplace=True)
+        dfagg=dfagg.reset_index()
+     
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=dfHex.apply(lambda x: AssignPopulationToHex(x['hex_id'],dfagg),axis=1)
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+        del dfagg       
+   
+    else:
+        print(' No population in =======> ',province)
+        
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=0
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+    ##########################################################################################
+    return dfHex
+
+
+########################################################################################################
+######  Input ----  ####################################################################################
+# SQL connection for writing data to database
+conn = connect_tad
+
+# level 8 covers approx 1 km2
+h3_level=8   
 
 file_path='C:\\Users\\70018928\\Documents\\Project2021\\Experiment\\Uber_h3\\boundary_data\\'
 write_path='C:\\Users\\70018928\\Documents\\Project2021\\Experiment\\Uber_h3\\shapefile\\'
 qgis_path='C:\\Users\\70018928\\Documents\\Project2021\\Experiment\\Uber_h3\\qgis_shapefile\\'
 
+#######################################################################################################
+
 # Read province boundary data
 filenameList=GetFileNameList(file_path)
 #print(' ---> ',filenameList)
 
-for file_name in filenameList:  # [:2]:
+for file_name in filenameList[:2]:
     #file_name='boundary_ชลบุรี.data'
 
     province=file_name.split('_')[1].split('.')[0]
@@ -196,9 +398,7 @@ for file_name in filenameList:  # [:2]:
 
     hexList=[]
     for coor in testlist:  
-        geoJson = {"coordinates": [coor], "type": "Polygon"}
-        # level 8 covers approx 1 km2
-        h3_level=8        
+        geoJson = {"coordinates": [coor], "type": "Polygon"}   
             
         hexagons = list(h3.polyfill(geoJson,h3_level))
         print(' ==> ',len(hexagons))
@@ -213,135 +413,66 @@ for file_name in filenameList:  # [:2]:
     print(' ==> ',len(totalList))
     hexagons=totalList
 
-    dfIn=Read_Location_Popoulation(province)
-
-    if(len(dfIn)>0):
-        print('There are population in ',province)
-        # # Read Facebook population ,saved in dfIn, selected only lat lng and population columns stored in dfDummy
-        # print(dfIn.columns, '===== ',dfIn.head(5))
-        # dfDummy=dfIn[['Longitude','Latitude','population']].copy()
-        # del dfIn
-        # #print(dfDummy.columns,' ----- ',dfDummy.head(5))
-
-        # # Find hex_id of population location
-        # dfDummy['hex_id']=dfDummy.apply(lambda x:GetH3hex(x['Latitude'],x['Longitude'],h3_level),axis=1)
-        
-        # # compute summation of population on each existing grid in dfDummy
-        # dfagg = dfDummy.groupby(by = "hex_id").sum()
-        # dfagg.drop(columns=['Longitude','Latitude'],inplace=True)
-        # dfagg=dfagg.reset_index()
-
-        # # Create dataframe with one columns from hexagons (total hex_id of the selected province) , named it dfHex
-        # dfHex=pd.DataFrame(hexagons, columns=['hex_id'])
-        # #dfHex.head(10)
-        # print(len(dfHex),' ------  ',dfHex.head(10))
-
-        # # Allocate compute total population to dfHex
-        # dfHex['population']=dfHex.apply(lambda x: AssignPopulationToHex(x['hex_id'],dfagg),axis=1)
-        # print(len(dfHex), ' ---- ',dfHex.head(10))
-        # del dfagg
-
-        # # Save dfHex with 2 columns, hex_id and population in dfDummy
-        # dfDummy=dfHex.copy().reset_index(drop=True)
-
-        # # Find center point of each hex_id
-        # dfDummy['lat'] = dfDummy['hex_id'].apply(lambda x: h3.h3_to_geo(x)[0])
-        # dfDummy['lng'] = dfDummy['hex_id'].apply(lambda x: h3.h3_to_geo(x)[1])
-
-        # # write out lat, lng, population, hex_id  of all grids generated
-        # #dfDummy.to_csv(file_path+'test_'+province+'_h3.csv')
-
-        # # Cretae geometry columns (this is in 4326 to use with Kepler.gl)
-        # dfDummy["geometry"] =  dfDummy.hex_id.apply(lambda x: 
-        #                                                     {    "type" : "Polygon",
-        #                                                             "coordinates": 
-        #                                                             [h3.h3_to_geo_boundary(x)]
-                                                                    
-        #                                                         })
-
-        # ## csv file as an input of the ConvertCSV_To_Shapefile_rev2 on local machine
-        # dfDummy.rename(columns={'lat':'Latitude','lng':'Longitude'}, inplace=True)
-        # dfDummy.to_csv(write_path+'\\test_'+province+'_shapefile.csv')  
-        # dfDummy['p_name_t']=province
-        # dfDummy['DBCreatedAt']=nowStr 
-        # dfDummy_2=dfDummy.copy()
-        # dfDummy_2['geometry']=dfDummy_2['geometry'].astype(str)
-        # Write_H3_Kepler_Grid_Province(dfDummy_2,conn)
-
-        
-        # #print(' --> ',df.head(10))
-        # # 4 Create tuples of geometry by zipping Longitude and latitude columns in your csv file
-        # #geometry = [Point(xy) for xy in zip(df.Longitude, df.Latitude)]         
-        # #print(' ===> ',geometry)
-
-        # # Convert information in geometry columns to 32647 coordinates to use with QGIS
-        # dfDummy['geom_2']=dfDummy.apply(lambda x: ConvertGeometryCoordinate(x['geometry']),axis=1 )
-        # dfDummy.drop(columns=['geometry'],inplace=True)
-        # dfDummy.rename(columns={'geom_2':'geometry'},inplace=True)
-        # dfDummy['geometry']=dfDummy['geometry'].astype(str)
-
-        # print(dfDummy.columns,' ===> ',dfDummy)
-        # dfDummy.to_csv(qgis_path+'test_'+province+'_shapefile_32647.csv')   
-        # Write_H3_Grid_Province(dfDummy,conn)    
-    else:
-        print(' No population in =======> ',province)
-        
-        # Create dataframe with one columns from hexagons (total hex_id of the selected province) , named it dfHex
-        dfHex=pd.DataFrame(hexagons, columns=['hex_id'])
-        #dfHex.head(10)
-        print(len(dfHex),' ------  ',dfHex.head(10))
-
-        # Allocate compute total population to dfHex
-        dfHex['population']=0
-        print(len(dfHex), ' ---- ',dfHex.head(10))
-
-        # Save dfHex with 2 columns, hex_id and population in dfDummy
-        dfDummy=dfHex.copy().reset_index(drop=True)
-
-        # Find center point of each hex_id
-        dfDummy['lat'] = dfDummy['hex_id'].apply(lambda x: h3.h3_to_geo(x)[0])
-        dfDummy['lng'] = dfDummy['hex_id'].apply(lambda x: h3.h3_to_geo(x)[1])
-
-        # write out lat, lng, population, hex_id  of all grids generated
-        #dfDummy.to_csv(file_path+'test_'+province+'_h3.csv')
-
-        # Cretae geometry columns (this is in 4326 to use with Kepler.gl)
-        dfDummy["geometry"] =  dfDummy.hex_id.apply(lambda x: 
-                                                            {    "type" : "Polygon",
-                                                                    "coordinates": 
-                                                                    [h3.h3_to_geo_boundary(x)]
-                                                                    
-                                                                })
-
-        ## csv file as an input of the ConvertCSV_To_Shapefile_rev2 on local machine
-        dfDummy.rename(columns={'lat':'Latitude','lng':'Longitude'}, inplace=True)
-        dfDummy.to_csv(write_path+'\\test_'+province+'_shapefile.csv')  
-        dfDummy['p_name_t']=province
-        dfDummy['DBCreatedAt']=nowStr 
-        dfDummy_2=dfDummy.copy()
-        dfDummy_2['geometry']=dfDummy_2['geometry'].astype(str)
-        Write_H3_Kepler_Grid_Province(dfDummy_2,conn)
-
-        
-        #print(' --> ',df.head(10))
-        # 4 Create tuples of geometry by zipping Longitude and latitude columns in your csv file
-        #geometry = [Point(xy) for xy in zip(df.Longitude, df.Latitude)]         
-        #print(' ===> ',geometry)
-
-        # Convert information in geometry columns to 32647 coordinates to use with QGIS
-        dfDummy['geom_2']=dfDummy.apply(lambda x: ConvertGeometryCoordinate(x['geometry']),axis=1 )
-        dfDummy.drop(columns=['geometry'],inplace=True)
-        dfDummy.rename(columns={'geom_2':'geometry'},inplace=True)
-        dfDummy['geometry']=dfDummy['geometry'].astype(str)
-
-        print(dfDummy.columns,' ===> ',dfDummy)
-        dfDummy.to_csv(qgis_path+'test_'+province+'_shapefile_32647.csv')   
-        Write_H3_Grid_Province(dfDummy,conn)   
+    # Create dataframe with one columns from hexagons (total hex_id of the selected province) , named it dfHex
+    dfHex=pd.DataFrame(hexagons, columns=['hex_id'])
+    #dfHex.head(10)
+    print(len(dfHex),' ------  ',dfHex.head(10))
 
 
+    dfHex=Get_Facebook_Population(province, dfHex, 'population')
+    dfHex=Get_Facebook_Population_Youth_15_24(province, dfHex, 'population_youth')
+    # Save dfHex with 2 ++ columns, hex_id and population and ++ in dfDummy
+    dfDummy=dfHex.copy().reset_index(drop=True)
+
+    # Find center point of each hex_id
+    dfDummy['lat'] = dfDummy['hex_id'].apply(lambda x: h3.h3_to_geo(x)[0])
+    dfDummy['lng'] = dfDummy['hex_id'].apply(lambda x: h3.h3_to_geo(x)[1])
+
+
+    # Cretae geometry columns (this is in 4326 to use with Kepler.gl)
+    dfDummy["geometry"] =  dfDummy.hex_id.apply(lambda x: 
+                                                        {    "type" : "Polygon",
+                                                                "coordinates": 
+                                                                [h3.h3_to_geo_boundary(x)]
+                                                                
+                                                            })
+
+    ## csv file as an input of the ConvertCSV_To_Shapefile_rev2 on local machine
+    print(' ===>  Kepler data out')
+    dfDummy.rename(columns={'lat':'Latitude','lng':'Longitude'}, inplace=True)
+    dfDummy.to_csv(write_path+'\\test_'+province+'_shapefile.csv')  
+    dfDummy['p_name_t']=province
+    dfDummy['DBCreatedAt']=nowStr 
+    dfDummy_2=dfDummy.copy()
+    dfDummy_2['geometry']=dfDummy_2['geometry'].astype(str)
+    Write_H3_Kepler_Grid_Province_2(dfDummy_2,conn)
+
+
+    # Convert information in geometry columns to 32647 coordinates to use with QGIS
+    print(' ===>  Convert Coordinates 4236 -> 32647 ')
+    dfDummy['geom_2']=dfDummy.apply(lambda x: ConvertGeometryCoordinate(x['geometry']),axis=1 )
+    dfDummy.drop(columns=['geometry'],inplace=True)
+    dfDummy.rename(columns={'geom_2':'geometry'},inplace=True)
+    dfDummy['geometry']=dfDummy['geometry'].astype(str)
+
+
+    # Find District and Subdistrict location of each grid
+    print(' ===>  Reverse Geocoding')
+    dfDummy=Reverse_GeoCoding(dfDummy)
+    includeList=[ 'hex_id', 'population','population_youth', 'Latitude', 'Longitude','p_name_t_left',
+       'DBCreatedAt', 'geometry', 'a_name_t',  't_name_t', 's_region', 'prov_idn', 'amphoe_idn', 'tambon_idn',]       
+    dfDummy=dfDummy[includeList]
+    dfDummy.rename(columns={'p_name_t_left':'p_name_t'},inplace=True)
+    print(dfDummy.columns,' ===> ',dfDummy)
+
+    # Write data to files and databse
+    print(' ===>  QGIS data out ')
+    dfDummy.to_csv(qgis_path+'test_'+province+'_shapefile_32647_PAT.csv')   
+    Write_H3_Grid_Province_PAT(dfDummy,conn) 
 
 conn.close()
-del dfDummy, dfHex,  dfDummy_2
+del dfDummy, dfHex, dfDummy_2
+del includeList, hexagons, totalList, testlist, hexList, filenameList
 ###****************************************************************
 end_datetime = datetime.now()
 print ('---Start---',start_datetime)

@@ -18,6 +18,37 @@ print("nowStr's date:", nowStr,' -- ',type(nowStr))
 file_path='C:\\Users\\70018928\\Documents\\Project2021\\Food\\FB_Population\\'
 file_name='test_data.xlsx'
 
+def Read_FB_Population_Youth_15_24_Prv(prv_input):
+        print('------------- Start ReadDB -------------')
+        #dfout = pd.DataFrame(columns=['EmployeeId','UserLat','UserLong','DateTimeStamp'])
+        # ODBC Driver 17 for SQL Server
+        host=machine_1
+        database=server_1
+        user=username_1
+        password=password_1
+        connection = psycopg2.connect(host=host, database=database, user=user, password=password)
+        cursor_po = connection.cursor()
+
+        sql=""
+
+        if(len(prv_input)>0):
+                print(' Province ------------------------------------------------- ') 
+                sql = """SELECT * FROM public.\"fb_population_youth_15_24\" where p_name_t = '"""+str(prv_input)+"""'  """
+        else:
+                print(' ALL ****************************************************** ') 
+                sql = """SELECT * FROM public.\"fb_population_youth_15_24\" """
+
+        dfout = pd.read_sql_query(sql, connection)
+
+        print(len(dfout), ' =======================  ',dfout.head(10))
+
+        if connection:
+                cursor_po.close()
+                connection.close()
+                print("PostgreSQL connection is closed")    
+
+        return dfout
+
 
 def Read_FB_Population_General_Prv(prv_input, d_input, s_input):
         print('------------- Start ReadDB -------------')
@@ -149,7 +180,7 @@ def Write_FB_Population_Clustered(df_input):
 
 #prvList=['ฉะเชิงเทรา','ระยอง','ชลบุรี','กรุงเทพมหานคร','ปทุมธานี']
 
-def Read_Location_Popoulation(province):
+def Read_Location_Population(province):
 
     prvList=[province]
 
@@ -164,7 +195,20 @@ def Read_Location_Popoulation(province):
 
     return dfIn
 
+def Read_Location_Population_Youth_15_24(province):
 
+    prvList=[province]
+
+    for prv_name in prvList:  #[:2]:
+        print(' ===> ',prv_name)
+        dfIn=Read_FB_Population_Youth_15_24_Prv(prv_name)
+        dfIn.rename(columns={'lng':'Longitude','lat':'Latitude'}, inplace=True)
+        print(len(dfIn), ' --------  in ------ ',dfIn.head(10))
+        #dfIn.to_csv(file_path+'pathumthani.csv')
+
+    del prvList
+
+    return dfIn
 
 
 
