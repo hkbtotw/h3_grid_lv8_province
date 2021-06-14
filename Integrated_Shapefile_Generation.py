@@ -207,11 +207,11 @@ def Write_H3_Grid_Province_PAT(df_input, conn1):
       ,[Longitude]
       ,[population]
       ,[population_youth]
-      ,[population_elder],
-	    ,[population_under_five],
-	    ,[population_515_2560],
-	    ,[population_men],
-	    ,[population_women],
+      ,[population_elder]
+	    ,[population_under_five]
+	    ,[population_515_2560]
+	    ,[population_men]
+	    ,[population_women]
       ,[geometry]
       ,[p_name_t]
       ,[a_name_t]
@@ -288,7 +288,7 @@ def Write_H3_Kepler_Grid_Province_2(df_input,conn2):
 	    ,[population_under_five]
 	    ,[population_515_2560]
 	    ,[population_men]
-	    ,[population_women
+	    ,[population_women]
       ,[geometry]
       ,[p_name_t]
       ,[DBCreatedAt]
