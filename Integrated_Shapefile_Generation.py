@@ -207,6 +207,11 @@ def Write_H3_Grid_Province_PAT(df_input, conn1):
       ,[Longitude]
       ,[population]
       ,[population_youth]
+      ,[population_elder],
+	    ,[population_under_five],
+	    ,[population_515_2560],
+	    ,[population_men],
+	    ,[population_women],
       ,[geometry]
       ,[p_name_t]
       ,[a_name_t]
@@ -220,7 +225,8 @@ def Write_H3_Grid_Province_PAT(df_input, conn1):
 	)     
     values(?,?,?,?,?,
     ?,?,?,?,?,
-    ?,?,?,?
+    ?,?,?,?,
+    ?,?,?,?,?
   
     )""", 
       row['hex_id']
@@ -228,6 +234,11 @@ def Write_H3_Grid_Province_PAT(df_input, conn1):
       ,row['Longitude']
       ,row['population']
       ,row['population_youth']
+      ,row['population_elder']
+	    ,row['population_under_five']
+	    ,row['population_515_2560']
+	    ,row['population_men']
+	    ,row['population_women']
       ,row['geometry']
       ,row['p_name_t']
       ,row['a_name_t']
@@ -273,12 +284,18 @@ def Write_H3_Kepler_Grid_Province_2(df_input,conn2):
       ,[Longitude]
       ,[population]
       ,[population_youth]
+        ,[population_elder]
+	    ,[population_under_five]
+	    ,[population_515_2560]
+	    ,[population_men]
+	    ,[population_women
       ,[geometry]
       ,[p_name_t]
       ,[DBCreatedAt]
     
 	)     
-    values(?,?,?,?,?,?,?,?
+    values(?,?,?,?,?,?,?,?,
+    ?,?,?,?,?
   
     )""", 
       row['hex_id']
@@ -286,6 +303,11 @@ def Write_H3_Kepler_Grid_Province_2(df_input,conn2):
       ,row['Longitude']
       ,row['population']
       ,row['population_youth']
+              ,row['population_elder']
+	    ,row['population_under_five']
+	    ,row['population_515_2560']
+	    ,row['population_men']
+	    ,row['population_women']
       ,row['geometry']
       ,row['p_name_t']
       ,row['DBCreatedAt']
