@@ -368,6 +368,147 @@ def Get_Facebook_Population_Youth_15_24(province, dfHex, columns_name):
     ##########################################################################################
     return dfHex
 
+def Get_Facebook_Population_elderly_60_plus(province, dfHex, columns_name):
+    #######################################################################################################
+    # Read facebook population from database on sandbox    
+    dfIn=Read_Location_Population_elderly_60_plus(province)   
+
+    if(len(dfIn)>0):        
+        print('There are elder population in ',province)
+        # Read Facebook population ,saved in dfIn, selected only lat lng and population columns stored in dfDummy
+        #print(dfIn.columns, '===== ',dfIn.head(5))
+        dfDummy=dfIn[['Longitude','Latitude','population']].copy()        
+        del dfIn
+        #print(dfDummy.columns,' ----- ',dfDummy.head(5))
+
+        # Find hex_id of population location
+        dfDummy['hex_id']=dfDummy.apply(lambda x:GetH3hex(x['Latitude'],x['Longitude'],h3_level),axis=1)        
+        
+        # compute summation of population on each existing grid in dfDummy
+        dfagg = dfDummy.groupby(by = "hex_id").sum()
+        dfagg.drop(columns=['Longitude','Latitude'],inplace=True)
+        dfagg=dfagg.reset_index()
+     
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=dfHex.apply(lambda x: AssignPopulationToHex(x['hex_id'],dfagg),axis=1)
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+        del dfagg       
+   
+    else:
+        print(' No elder population in =======> ',province)
+        
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=0
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+    ##########################################################################################
+    return dfHex
+
+def Get_Facebook_Population_children_under_five(province, dfHex, columns_name):
+    #######################################################################################################
+    # Read facebook population from database on sandbox    
+    dfIn=Read_Location_Population_children_under_five(province)   
+
+    if(len(dfIn)>0):        
+        print('There are under five population in ',province)
+        # Read Facebook population ,saved in dfIn, selected only lat lng and population columns stored in dfDummy
+        #print(dfIn.columns, '===== ',dfIn.head(5))
+        dfDummy=dfIn[['Longitude','Latitude','population']].copy()        
+        del dfIn
+        #print(dfDummy.columns,' ----- ',dfDummy.head(5))
+
+        # Find hex_id of population location
+        dfDummy['hex_id']=dfDummy.apply(lambda x:GetH3hex(x['Latitude'],x['Longitude'],h3_level),axis=1)        
+        
+        # compute summation of population on each existing grid in dfDummy
+        dfagg = dfDummy.groupby(by = "hex_id").sum()
+        dfagg.drop(columns=['Longitude','Latitude'],inplace=True)
+        dfagg=dfagg.reset_index()
+     
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=dfHex.apply(lambda x: AssignPopulationToHex(x['hex_id'],dfagg),axis=1)
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+        del dfagg       
+   
+    else:
+        print(' No under five population in =======> ',province)
+        
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=0
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+    ##########################################################################################
+    return dfHex
+
+
+def Get_Facebook_Population_men(province, dfHex, columns_name):
+    #######################################################################################################
+    # Read facebook population from database on sandbox    
+    dfIn=Read_Location_Population_men(province)   
+
+    if(len(dfIn)>0):        
+        print('There are men population in ',province)
+        # Read Facebook population ,saved in dfIn, selected only lat lng and population columns stored in dfDummy
+        #print(dfIn.columns, '===== ',dfIn.head(5))
+        dfDummy=dfIn[['Longitude','Latitude','population']].copy()        
+        del dfIn
+        #print(dfDummy.columns,' ----- ',dfDummy.head(5))
+
+        # Find hex_id of population location
+        dfDummy['hex_id']=dfDummy.apply(lambda x:GetH3hex(x['Latitude'],x['Longitude'],h3_level),axis=1)        
+        
+        # compute summation of population on each existing grid in dfDummy
+        dfagg = dfDummy.groupby(by = "hex_id").sum()
+        dfagg.drop(columns=['Longitude','Latitude'],inplace=True)
+        dfagg=dfagg.reset_index()
+     
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=dfHex.apply(lambda x: AssignPopulationToHex(x['hex_id'],dfagg),axis=1)
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+        del dfagg       
+   
+    else:
+        print(' No men population in =======> ',province)
+        
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=0
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+    ##########################################################################################
+    return dfHex
+
+def Get_Facebook_Population_women(province, dfHex, columns_name):
+    #######################################################################################################
+    # Read facebook population from database on sandbox    
+    dfIn=Read_Location_Population_women(province)   
+
+    if(len(dfIn)>0):        
+        print('There are women population in ',province)
+        # Read Facebook population ,saved in dfIn, selected only lat lng and population columns stored in dfDummy
+        #print(dfIn.columns, '===== ',dfIn.head(5))
+        dfDummy=dfIn[['Longitude','Latitude','population']].copy()        
+        del dfIn
+        #print(dfDummy.columns,' ----- ',dfDummy.head(5))
+
+        # Find hex_id of population location
+        dfDummy['hex_id']=dfDummy.apply(lambda x:GetH3hex(x['Latitude'],x['Longitude'],h3_level),axis=1)        
+        
+        # compute summation of population on each existing grid in dfDummy
+        dfagg = dfDummy.groupby(by = "hex_id").sum()
+        dfagg.drop(columns=['Longitude','Latitude'],inplace=True)
+        dfagg=dfagg.reset_index()
+     
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=dfHex.apply(lambda x: AssignPopulationToHex(x['hex_id'],dfagg),axis=1)
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+        del dfagg       
+   
+    else:
+        print(' No women population in =======> ',province)
+        
+        # Allocate compute total population to dfHex
+        dfHex[columns_name]=0
+        print(len(dfHex), ' ---- ',dfHex.head(10))
+    ##########################################################################################
+    return dfHex
+
 
 ########################################################################################################
 ######  Input ----  ####################################################################################
@@ -421,6 +562,14 @@ for file_name in filenameList:  #[:2]:
 
     dfHex=Get_Facebook_Population(province, dfHex, 'population')
     dfHex=Get_Facebook_Population_Youth_15_24(province, dfHex, 'population_youth')
+    dfHex=Get_Facebook_Population_elderly_60_plus(province, dfHex, 'population_elder')
+    dfHex=Get_Facebook_Population_children_under_five(province, dfHex, 'population_under_five')
+    dfHex['population_515_2560']=dfHex['population']-dfHex['population_youth']-dfHex['population_elder']-dfHex['population_under_five']
+
+    dfHex=Get_Facebook_Population_men(province, dfHex, 'population_men')
+    dfHex=Get_Facebook_Population_women(province, dfHex, 'population_women')
+
+
     # Save dfHex with 2 ++ columns, hex_id and population and ++ in dfDummy
     dfDummy=dfHex.copy().reset_index(drop=True)
 

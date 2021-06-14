@@ -18,6 +18,134 @@ print("nowStr's date:", nowStr,' -- ',type(nowStr))
 file_path='C:\\Users\\70018928\\Documents\\Project2021\\Food\\FB_Population\\'
 file_name='test_data.xlsx'
 
+
+def Read_FB_Population_women(prv_input):
+        print('------------- Start ReadDB - fb_population_women -------------')
+        #dfout = pd.DataFrame(columns=['EmployeeId','UserLat','UserLong','DateTimeStamp'])
+        # ODBC Driver 17 for SQL Server
+        host=machine_1
+        database=server_1
+        user=username_1
+        password=password_1
+        connection = psycopg2.connect(host=host, database=database, user=user, password=password)
+        cursor_po = connection.cursor()
+
+        sql=""
+
+        if(len(prv_input)>0):
+                print(' Province ------------------------------------------------- ') 
+                sql = """SELECT * FROM public.\"fb_population_women\" where p_name_t = '"""+str(prv_input)+"""'  """
+        else:
+                print(' ALL ****************************************************** ') 
+                sql = """SELECT * FROM public.\"fb_population_women\" """
+
+        dfout = pd.read_sql_query(sql, connection)
+
+        print(len(dfout), ' =======================  ',dfout.head(10))
+
+        if connection:
+                cursor_po.close()
+                connection.close()
+                print("PostgreSQL connection is closed")    
+
+        return dfout
+
+
+
+def Read_FB_Population_men(prv_input):
+        print('------------- Start ReadDB - fb_population_men -------------')
+        #dfout = pd.DataFrame(columns=['EmployeeId','UserLat','UserLong','DateTimeStamp'])
+        # ODBC Driver 17 for SQL Server
+        host=machine_1
+        database=server_1
+        user=username_1
+        password=password_1
+        connection = psycopg2.connect(host=host, database=database, user=user, password=password)
+        cursor_po = connection.cursor()
+
+        sql=""
+
+        if(len(prv_input)>0):
+                print(' Province ------------------------------------------------- ') 
+                sql = """SELECT * FROM public.\"fb_population_men\" where p_name_t = '"""+str(prv_input)+"""'  """
+        else:
+                print(' ALL ****************************************************** ') 
+                sql = """SELECT * FROM public.\"fb_population_men\" """
+
+        dfout = pd.read_sql_query(sql, connection)
+
+        print(len(dfout), ' =======================  ',dfout.head(10))
+
+        if connection:
+                cursor_po.close()
+                connection.close()
+                print("PostgreSQL connection is closed")    
+
+        return dfout
+
+
+def Read_FB_Population_children_under_five(prv_input):
+        print('------------- Start ReadDB - fb_population_elderly_60_plus -------------')
+        #dfout = pd.DataFrame(columns=['EmployeeId','UserLat','UserLong','DateTimeStamp'])
+        # ODBC Driver 17 for SQL Server
+        host=machine_1
+        database=server_1
+        user=username_1
+        password=password_1
+        connection = psycopg2.connect(host=host, database=database, user=user, password=password)
+        cursor_po = connection.cursor()
+
+        sql=""
+
+        if(len(prv_input)>0):
+                print(' Province ------------------------------------------------- ') 
+                sql = """SELECT * FROM public.\"fb_population_children_under_five\" where p_name_t = '"""+str(prv_input)+"""'  """
+        else:
+                print(' ALL ****************************************************** ') 
+                sql = """SELECT * FROM public.\"fb_population_children_under_five\" """
+
+        dfout = pd.read_sql_query(sql, connection)
+
+        print(len(dfout), ' =======================  ',dfout.head(10))
+
+        if connection:
+                cursor_po.close()
+                connection.close()
+                print("PostgreSQL connection is closed")    
+
+        return dfout
+
+def Read_FB_Population_elderly_60_plus(prv_input):
+        print('------------- Start ReadDB - fb_population_elderly_60_plus -------------')
+        #dfout = pd.DataFrame(columns=['EmployeeId','UserLat','UserLong','DateTimeStamp'])
+        # ODBC Driver 17 for SQL Server
+        host=machine_1
+        database=server_1
+        user=username_1
+        password=password_1
+        connection = psycopg2.connect(host=host, database=database, user=user, password=password)
+        cursor_po = connection.cursor()
+
+        sql=""
+
+        if(len(prv_input)>0):
+                print(' Province ------------------------------------------------- ') 
+                sql = """SELECT * FROM public.\"fb_population_elderly_60_plus\" where p_name_t = '"""+str(prv_input)+"""'  """
+        else:
+                print(' ALL ****************************************************** ') 
+                sql = """SELECT * FROM public.\"fb_population_elderly_60_plus\" """
+
+        dfout = pd.read_sql_query(sql, connection)
+
+        print(len(dfout), ' =======================  ',dfout.head(10))
+
+        if connection:
+                cursor_po.close()
+                connection.close()
+                print("PostgreSQL connection is closed")    
+
+        return dfout
+
 def Read_FB_Population_Youth_15_24_Prv(prv_input):
         print('------------- Start ReadDB -------------')
         #dfout = pd.DataFrame(columns=['EmployeeId','UserLat','UserLong','DateTimeStamp'])
@@ -48,7 +176,6 @@ def Read_FB_Population_Youth_15_24_Prv(prv_input):
                 print("PostgreSQL connection is closed")    
 
         return dfout
-
 
 def Read_FB_Population_General_Prv(prv_input, d_input, s_input):
         print('------------- Start ReadDB -------------')
@@ -210,8 +337,65 @@ def Read_Location_Population_Youth_15_24(province):
 
     return dfIn
 
+def Read_Location_Population_elderly_60_plus(province):
 
+    prvList=[province]
 
+    for prv_name in prvList:  #[:2]:
+        print(' ===> ',prv_name)
+        dfIn=Read_FB_Population_elderly_60_plus(prv_name)
+        dfIn.rename(columns={'lng':'Longitude','lat':'Latitude'}, inplace=True)
+        print(len(dfIn), ' --------  in ------ ',dfIn.head(10))
+        #dfIn.to_csv(file_path+'pathumthani.csv')
+
+    del prvList
+
+    return dfIn
+
+def Read_Location_Population_children_under_five(province):
+
+    prvList=[province]
+
+    for prv_name in prvList:  #[:2]:
+        print(' ===> ',prv_name)
+        dfIn=Read_FB_Population_children_under_five(prv_name)
+        dfIn.rename(columns={'lng':'Longitude','lat':'Latitude'}, inplace=True)
+        print(len(dfIn), ' --------  in ------ ',dfIn.head(10))
+        #dfIn.to_csv(file_path+'pathumthani.csv')
+
+    del prvList
+
+    return dfIn
+
+def Read_Location_Population_men(province):
+
+    prvList=[province]
+
+    for prv_name in prvList:  #[:2]:
+        print(' ===> ',prv_name)
+        dfIn=Read_FB_Population_men(prv_name)
+        dfIn.rename(columns={'lng':'Longitude','lat':'Latitude'}, inplace=True)
+        print(len(dfIn), ' --------  in ------ ',dfIn.head(10))
+        #dfIn.to_csv(file_path+'pathumthani.csv')
+
+    del prvList
+
+    return dfIn
+
+def Read_Location_Population_women(province):
+
+    prvList=[province]
+
+    for prv_name in prvList:  #[:2]:
+        print(' ===> ',prv_name)
+        dfIn=Read_FB_Population_women(prv_name)
+        dfIn.rename(columns={'lng':'Longitude','lat':'Latitude'}, inplace=True)
+        print(len(dfIn), ' --------  in ------ ',dfIn.head(10))
+        #dfIn.to_csv(file_path+'pathumthani.csv')
+
+    del prvList
+
+    return dfIn
 
 ###****************************************************************
 end_datetime = datetime.now()
