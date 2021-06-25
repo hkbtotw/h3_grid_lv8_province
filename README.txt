@@ -38,3 +38,4 @@ Note:
 ref: 
 1. https://dataforgood.fb.com/docs/high-resolution-population-density-maps-demographic-estimates-documentation/    (general information of fb population density dataset)
 2. https://data.humdata.org/organization/facebook   (download data)
+3. https://h3geo.org/docs/api/traversal#hexring  (H3 API documentation)
