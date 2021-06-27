@@ -20,7 +20,15 @@ Avail Dataset:
 
 
 How:
-1.Run Inegreated_Shapefile_Generation.py
+1.Select h3_level to generate h3 grids  
+    h3_level=9   
+
+  Select if using the specific provinces
+    # if_all_provinces=1 => Use all provinces in boundary_data
+    # if_all_provinces=2 => Incase, previous run not complete, Continue running from what being left off from previous run.
+    if_all_provinces=1
+
+2.Run Inegreated_Shapefile_Generation.py
 
 Note: Code will read the boundary data file in folder boundary and generate shapefiles ( in csv ) to use with Kepler.gl and QGIS 
 in table : [TSR_ADHOC].[dbo].[H3_Kepler_Grid_Lv8_Province_2]  and [TSR_ADHOC].[dbo].[H3_Grid_Lv8_Province_PAT] respectively.
