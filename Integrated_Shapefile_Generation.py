@@ -12,6 +12,7 @@ import ast
 import pandas as pd
 import pickle
 import glob
+from sys import exit
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -318,6 +319,145 @@ def Write_H3_Kepler_Grid_Province_2(df_input,conn2):
 
     print('------------Complete WriteDB-------------')
 
+def Write_H3_Grid_Lv9_Province_PAT(df_input, conn1):
+    print('------------- Start WriteDB -------------')
+    #df_input=df_input.replace([np.inf,-np.inf,np.nan],-999)
+    df_input=df_input.replace({np.nan:None})
+    df_write=df_input
+    print(' col : ',df_write.columns)
+
+
+	## ODBC Driver 17 for SQL Server
+    # SQL Server
+   
+    
+
+    #- View all records from the table
+    
+    #sql="""delete from [TSR_ADHOC].[dbo].[H3_Grid_Province]  """ 
+    sql="""select * from [TSR_ADHOC].[dbo].[H3_Grid_Lv9_Province_PAT]  """
+    cursor=conn1.cursor()
+    cursor.execute(sql)
+    conn1.commit()
+
+    for index, row in df_write.iterrows():
+        cursor.execute("""INSERT INTO [TSR_ADHOC].[dbo].[H3_Grid_Lv9_Province_PAT](	
+
+     [hex_id]
+      ,[Latitude]
+      ,[Longitude]
+      ,[population]
+      ,[population_youth]
+      ,[population_elder]
+	    ,[population_under_five]
+	    ,[population_515_2560]
+	    ,[population_men]
+	    ,[population_women]
+      ,[geometry]
+      ,[p_name_t]
+      ,[a_name_t]
+      ,[t_name_t]
+      ,[s_region]
+      ,[prov_idn]
+      ,[amphoe_idn]
+      ,[tambon_idn]
+      ,[DBCreatedAt]
+    
+	)     
+    values(?,?,?,?,?,
+    ?,?,?,?,?,
+    ?,?,?,?,
+    ?,?,?,?,?
+  
+    )""", 
+      row['hex_id']
+      ,row['Latitude']
+      ,row['Longitude']
+      ,row['population']
+      ,row['population_youth']
+      ,row['population_elder']
+	    ,row['population_under_five']
+	    ,row['population_515_2560']
+	    ,row['population_men']
+	    ,row['population_women']
+      ,row['geometry']
+      ,row['p_name_t']
+      ,row['a_name_t']
+      ,row['t_name_t']
+      ,row['s_region']
+      ,row['prov_idn']
+      ,row['amphoe_idn']
+      ,row['tambon_idn']
+      ,row['DBCreatedAt']
+        )
+    conn1.commit()
+
+    cursor.close()
+    #conn1.close()
+    print('------------Complete WriteDB-------------')
+
+def Write_H3_Kepler_Grid_Lv9_Province_2(df_input,conn2):
+    print('------------- Start WriteDB -------------')
+    #df_input=df_input.replace([np.inf,-np.inf,np.nan],-999)
+    df_input=df_input.replace({np.nan:None})
+    df_write=df_input
+    print(' col : ',df_write.columns)
+
+
+	## ODBC Driver 17 for SQL Server
+    # SQL Server
+    
+    
+
+    #- View all records from the table
+    
+    #sql="""delete from [TSR_ADHOC].[dbo].[H3_Grid_Province]  """ 
+    sql="""select * from [TSR_ADHOC].[dbo].[H3_Kepler_Grid_Lv9_Province_2]  """
+    cursor=conn2.cursor()
+    cursor.execute(sql)
+    conn2.commit()
+
+    for index, row in df_write.iterrows():
+        cursor.execute("""INSERT INTO [TSR_ADHOC].[dbo].[H3_Kepler_Grid_Lv9_Province_2](	
+
+      [hex_id]
+      ,[Latitude]
+      ,[Longitude]
+      ,[population]
+      ,[population_youth]
+        ,[population_elder]
+	    ,[population_under_five]
+	    ,[population_515_2560]
+	    ,[population_men]
+	    ,[population_women]
+      ,[geometry]
+      ,[p_name_t]
+      ,[DBCreatedAt]
+    
+	)     
+    values(?,?,?,?,?,?,?,?,
+    ?,?,?,?,?
+  
+    )""", 
+      row['hex_id']
+      ,row['Latitude']
+      ,row['Longitude']
+      ,row['population']
+      ,row['population_youth']
+              ,row['population_elder']
+	    ,row['population_under_five']
+	    ,row['population_515_2560']
+	    ,row['population_men']
+	    ,row['population_women']
+      ,row['geometry']
+      ,row['p_name_t']
+      ,row['DBCreatedAt']
+        )
+    conn2.commit()
+
+    cursor.close()
+
+    print('------------Complete WriteDB-------------')
 
 # Read external complementary data to present on each grid
 def Get_Facebook_Population(province, dfHex, columns_name):
@@ -460,7 +600,6 @@ def Get_Facebook_Population_children_under_five(province, dfHex, columns_name):
     ##########################################################################################
     return dfHex
 
-
 def Get_Facebook_Population_men(province, dfHex, columns_name):
     #######################################################################################################
     # Read facebook population from database on sandbox    
@@ -538,20 +677,56 @@ def Get_Facebook_Population_women(province, dfHex, columns_name):
 conn = connect_tad
 
 # level 8 covers approx 1 km2
-h3_level=8   
+h3_level=9   
+
+# Select if using the specific provinces
+# if_all_provinces=1 => Use all provinces in boundary_data
+# if_all_provinces=2 => Incase, previous run not complete, Continue running from what being left off from previous run.
+if_all_provinces=1
 
 file_path='C:\\Users\\70018928\\Documents\\Project2021\\Experiment\\Uber_h3\\boundary_data\\'
+temp_path='C:\\Users\\70018928\\Documents\\Project2021\\Experiment\\Uber_h3\\temp\\'
 write_path='C:\\Users\\70018928\\Documents\\Project2021\\Experiment\\Uber_h3\\shapefile\\'
 qgis_path='C:\\Users\\70018928\\Documents\\Project2021\\Experiment\\Uber_h3\\qgis_shapefile\\'
 
 #######################################################################################################
 
-# Read province boundary data
-filenameList=GetFileNameList(file_path)
-#print(' ---> ',filenameList)
+###### Start from Scratch or Continue from previous incomplete runs
+if(if_all_provinces==1):
+    # Read province boundary data
+    print(' --- USE ALL PROVINCES IN BOUNDARY DATA --- ')
+    filenameList=GetFileNameList(file_path)
+    print(' ---> ',filenameList)
+    previousCompleteList=[]
+elif(if_all_provinces==2):
+    print(' --- Continue from Previous incomplete run  --- ')
+    allFilenameList=GetFileNameList(file_path)          
+    dfContinue=pd.read_csv(temp_path+'continue.csv')
+    completeFlg=dfContinue['completeFlg'].head(1).values[0]
+    #print(' continue : ',dfContinue, ' --- flag : ',completeFlg)
+    if(completeFlg==0):
+        previousCompleteList=list(dfContinue['Province'].unique())
+        print(' completeList : ',previousCompleteList)
+        continueList = np.setdiff1d( allFilenameList, previousCompleteList)   # find elements in allFilenameList not in dfContinue
+        print(' continueList : ',continueList)
+        pd.DataFrame(continueList, columns=['Province']).to_csv(temp_path+'incomplete.csv') 
+        filenameList=continueList
+        del allFilenameList, dfContinue
+        del completeFlg, continueList
+    else:
+        print(' **************************************** ')
+        print('  ----  Runs   actually  COMPLETE  ----   ')
+        print(' **************************************** ')
+        exit(0)
+else:
+    print(' **************************************** ')
+    print('  ----  PROBLEM WITH BOUNDARY DATA ----   ')
+    print(' **************************************** ')
+    exit(0)
 
+completeList=[]+previousCompleteList
 for file_name in filenameList:  #[:2]:
-    #file_name='boundary_ชลบุรี.data'
+    ################# format : file_name='boundary_ชลบุรี.data'
 
     province=file_name.split('_')[1].split('.')[0]
     print(' - ',province)
@@ -581,7 +756,6 @@ for file_name in filenameList:  #[:2]:
     #dfHex.head(10)
     print(len(dfHex),' ------  ',dfHex.head(10))
 
-
     dfHex=Get_Facebook_Population(province, dfHex, 'population')
     dfHex=Get_Facebook_Population_Youth_15_24(province, dfHex, 'population_youth')
     dfHex=Get_Facebook_Population_elderly_60_plus(province, dfHex, 'population_elder')
@@ -604,8 +778,7 @@ for file_name in filenameList:  #[:2]:
     dfDummy["geometry"] =  dfDummy.hex_id.apply(lambda x: 
                                                         {    "type" : "Polygon",
                                                                 "coordinates": 
-                                                                [h3.h3_to_geo_boundary(x)]
-                                                                
+                                                                [h3.h3_to_geo_boundary(x)]                                                                
                                                             })
 
     ## csv file as an input of the ConvertCSV_To_Shapefile_rev2 on local machine
@@ -616,7 +789,7 @@ for file_name in filenameList:  #[:2]:
     dfDummy['DBCreatedAt']=nowStr 
     dfDummy_2=dfDummy.copy()
     dfDummy_2['geometry']=dfDummy_2['geometry'].astype(str)
-    Write_H3_Kepler_Grid_Province_2(dfDummy_2,conn)
+    Write_H3_Kepler_Grid_Lv9_Province_2(dfDummy_2,conn)
 
 
     # Convert information in geometry columns to 32647 coordinates to use with QGIS
@@ -628,28 +801,35 @@ for file_name in filenameList:  #[:2]:
     
 
     # Find District and Subdistrict location of each grid
-
-
     print(' ===>  Reverse Geocoding')
     dfPAT=Reverse_GeoCoding(dfDummy[['hex_id', 'Latitude', 'Longitude']])
     includeList=['hex_id', 'Latitude', 'Longitude','p_name_t',
        'a_name_t',  't_name_t', 's_region', 'prov_idn', 'amphoe_idn', 'tambon_idn']       
-    dfPAT=dfPAT[includeList]
-    
+    dfPAT=dfPAT[includeList]    
 
     mainDf=pd.merge(dfDummy, dfPAT, how="left", on=["hex_id"])
     mainDf.rename(columns={'Latitude_x':'Latitude','Longitude_x':'Longitude','p_name_t_x':'p_name_t'},inplace=True)
-    print(mainDf.columns,' ===> ',mainDf, ' ----  ',mainDf.dtypes)
-    
+    print(mainDf.columns,' ===> ',mainDf, ' ----  ',mainDf.dtypes)    
 
     # Write data to files and databse
     print(' ===>  QGIS data out ')
     mainDf.to_csv(qgis_path+'test_'+province+'_shapefile_32647_PAT.csv')   
-    Write_H3_Grid_Province_PAT(mainDf,conn) 
+    Write_H3_Grid_Lv9_Province_PAT(mainDf,conn) 
+
+    # write temp file to check if the run is complete
+    completeList.append(file_name)
+
+dfComplete=pd.DataFrame(completeList, columns=['Province'])
+if(len(dfComplete)==len(filenameList)):
+    dfComplete['completeFlg']=1
+else:
+    dfComplete['completeFlg']=0
+dfComplete.to_csv(temp_path+'continue.csv')
+
 
 conn.close()
-del dfDummy, dfHex, dfDummy_2, mainDf, dfPAT
-del includeList, hexagons, totalList, testlist, hexList, filenameList
+del dfDummy, dfHex, dfDummy_2, mainDf, dfPAT, dfComplete
+del includeList, hexagons, totalList, testlist, hexList, filenameList, previousCompleteList
 ###****************************************************************
 end_datetime = datetime.now()
 print ('---Start---',start_datetime)

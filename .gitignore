@@ -5,6 +5,7 @@ shapefile/
 Credential.*
 Shapefile_Generation.py
 SHAPE/
+temp/
 bck.*
 
 
