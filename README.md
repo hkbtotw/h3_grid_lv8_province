@@ -1,7 +1,8 @@
-<h1>#Script to generate shapefile of grids on each province <h1>
+<h1>#Script to generate shapefile of grids on each province </h1>
 
 Update: <br />
--Created on 2021-06-10
+2021-06-10 Created by Tawan, T. <br />
+2021-06-28 Modify to handle incomplete runs <br />
 
 
 Why:<br />
