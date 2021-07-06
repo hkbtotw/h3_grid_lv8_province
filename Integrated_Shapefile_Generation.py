@@ -682,7 +682,7 @@ h3_level=9
 # Select if using the specific provinces
 # if_all_provinces=1 => Use all provinces in boundary_data
 # if_all_provinces=2 => Incase, previous run not complete, Continue running from what being left off from previous run.
-if_all_provinces=1
+if_all_provinces=2
 
 file_path='C:\\Users\\70018928\\Documents\\Project2021\\Experiment\\Uber_h3\\boundary_data\\'
 temp_path='C:\\Users\\70018928\\Documents\\Project2021\\Experiment\\Uber_h3\\temp\\'
@@ -818,17 +818,19 @@ for file_name in filenameList:  #[:2]:
 
     # write temp file to check if the run is complete
     completeList.append(file_name)
+    dfComplete=pd.DataFrame(completeList, columns=['Province'])
+    if(len(completeList)==len(filenameList)):
+        dfComplete['completeFlg']=1
+    else:
+        dfComplete['completeFlg']=0
+    dfComplete.to_csv(temp_path+'continue.csv')
+    del dfComplete
 
-dfComplete=pd.DataFrame(completeList, columns=['Province'])
-if(len(dfComplete)==len(filenameList)):
-    dfComplete['completeFlg']=1
-else:
-    dfComplete['completeFlg']=0
-dfComplete.to_csv(temp_path+'continue.csv')
+
 
 
 conn.close()
-del dfDummy, dfHex, dfDummy_2, mainDf, dfPAT, dfComplete
+del dfDummy, dfHex, dfDummy_2, mainDf, dfPAT
 del includeList, hexagons, totalList, testlist, hexList, filenameList, previousCompleteList
 ###****************************************************************
 end_datetime = datetime.now()
